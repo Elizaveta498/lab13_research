@@ -1,0 +1,38 @@
+{% extends 'research/base.html' %}
+
+{% block content %}
+<h1>Файл: {{ filename }}</h1>
+<a href="{% url 'research:files' %}" class="btn btn-link">← Назад к списку</a>
+
+{% if records %}
+    <table class="table table-striped mt-3">
+        <thead>
+        <tr>
+            <th>#</th><th>Название</th><th>Автор</th><th>Область</th>
+            <th>Начало</th><th>Окончание</th><th>Статус</th><th>Бюджет</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for r in records %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ r.title }}</td>
+                <td>{{ r.author }}</td>
+                <td>{{ r.field }}</td>
+                <td>{{ r.start_date }}</td>
+                <td>{{ r.end_date|default:"—" }}</td>
+                <td>{{ r.status }}</td>
+                <td>{{ r.budget }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <details class="mt-3">
+        <summary>Показать сырой JSON</summary>
+        <pre class="bg-light p-3 mt-2">{{ raw }}</pre>
+    </details>
+{% else %}
+    <div class="alert alert-warning">Файл пуст или не содержит записей.</div>
+{% endif %}
+{% endblock %}

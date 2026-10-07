@@ -1,0 +1,32 @@
+{% extends 'research/base.html' %}
+
+{% block content %}
+<h1>Файлы данных</h1>
+
+{% if files %}
+    <table class="table table-bordered">
+        <thead>
+        <tr><th>Имя</th><th>Размер</th><th>Изменён</th><th>Действия</th></tr>
+        </thead>
+        <tbody>
+        {% for f in files %}
+            <tr>
+                <td><a href="{% url 'research:file_detail' f.name %}">{{ f.name }}</a></td>
+                <td>{{ f.size }} байт</td>
+                <td>{{ f.modified }}</td>
+                <td>
+                    <a href="{% url 'research:file_download' f.name %}" class="btn btn-sm btn-outline-primary">Скачать</a>
+                    <form method="post" action="{% url 'research:file_delete' f.name %}" class="d-inline">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Удалить файл?')">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <div class="alert alert-warning">Ни одного файла на сервере нет.</div>
+{% endif %}
+{% endblock %}

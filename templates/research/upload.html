@@ -1,0 +1,19 @@
+{% extends 'research/base.html' %}
+
+{% block content %}
+<h1>Загрузка JSON-файла</h1>
+<p class="text-muted">
+    Файл должен содержать массив <code>records</code> с полями:
+    <code>title, author, field, description, start_date, end_date, status, budget</code>.
+</p>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="mb-3">
+        {{ form.file.label_tag }}
+        {{ form.file }}
+        {% if form.file.errors %}<div class="text-danger">{{ form.file.errors }}</div>{% endif %}
+    </div>
+    <button type="submit" class="btn btn-primary">Загрузить</button>
+</form>
+{% endblock %}
