@@ -83,7 +83,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-if os.environ.get('RENDER'):
+if os.environ.get('RENDER') or os.environ.get('NETRUN_ENV') or os.environ.get('PORT'):
     MEDIA_ROOT = os.path.join(DATA_DIR, 'media')
     DATA_ROOT = os.path.join(DATA_DIR, 'uploads')
     os.makedirs(MEDIA_ROOT, exist_ok=True)
