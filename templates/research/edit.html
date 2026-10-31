@@ -1,0 +1,19 @@
+{% extends 'research/base.html' %}
+
+{% block content %}
+<h1>Редактировать: {{ obj.title }}</h1>
+<form method="post" novalidate>
+    {% csrf_token %}
+    {% for field in form %}
+        <div class="mb-3">
+            <label class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+                <div class="text-danger small">{{ field.errors }}</div>
+            {% endif %}
+        </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+    <a href="{% url 'research:index' %}" class="btn btn-link">Отмена</a>
+</form>
+{% endblock %}

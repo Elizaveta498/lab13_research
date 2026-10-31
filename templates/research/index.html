@@ -9,44 +9,94 @@
     <a href="{% url 'research:upload' %}" class="btn btn-secondary">⬆ Загрузить JSON</a>
 </div>
 
-{% if records %}
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>#</th><th>Название</th><th>Автор</th><th>Область</th>
-            <th>Начало</th><th>Окончание</th><th>Статус</th><th>Бюджет</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for r in records %}
+<div class="btn-group mb-4" role="group">
+    <a href="?source=db" class="btn btn-{% if source == 'db' %}primary{% else %}outline-primary{% endif %}">📊 Данные из БД</a>
+    <a href="?source=files" class="btn btn-{% if source == 'files' %}primary{% else %}outline-primary{% endif %}">📁 Данные из файлов</a>
+</div>
+
+{% if source == 'db' %}
+    <div class="mb-3">
+        <input type="text" id="search-input" class="form-control" placeholder="🔍 Поиск по названию, автору, области...">
+    </div>
+
+    {% if records %}
+        <table class="table table-striped">
+            <thead>
             <tr>
-                <td>{{ r.id }}</td>
-                <td>{{ r.title }}</td>
-                <td>{{ r.author }}</td>
-                <td>{{ r.field }}</td>
-                <td>{{ r.start_date }}</td>
-                <td>{{ r.end_date|default:"—" }}</td>
-                <td>{{ r.get_status_display }}</td>
-                <td>{{ r.budget }}</td>
+                <th>#</th><th>Название</th><th>Автор</th><th>Область</th>
+                <th>Начало</th><th>Статус</th><th>Бюджет</th><th>Действия</th>
             </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody id="records-body">
+            {% for r in records %}
+                <tr>
+                    <td>{{ r.id }}</td>
+                    <td>{{ r.title }}</td>
+                    <td>{{ r.author }}</td>
+                    <td>{{ r.field }}</td>
+                    <td>{{ r.start_date|date:"d.m.Y" }}</td>
+                    <td>{{ r.get_status_display }}</td>
+                    <td>{{ r.budget }}</td>
+                    <td>
+                        <a href="{% url 'research:edit' r.id %}" class="btn btn-sm btn-outline-primary">✏</a>
+                        <form method="post" action="{% url 'research:delete' r.id %}" class="d-inline" onsubmit="return confirm('Удалить запись?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">🗑</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info">В базе данных пока нет записей.</div>
+    {% endif %}
 {% else %}
-    <div class="alert alert-info">Пока нет ни одной записи.</div>
+    <h3>Файлы данных ({{ files|length }})</h3>
+    {% if files %}
+        <ul class="list-group">
+            {% for f in files %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="{% url 'research:file_detail' f.name %}">{{ f.name }}</a>
+                    <span class="text-muted">{{ f.size }} байт — {{ f.modified }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="alert alert-warning">Файлов на сервере нет.</div>
+    {% endif %}
 {% endif %}
 
-<h3 class="mt-5">Файлы данных ({{ files|length }})</h3>
-{% if files %}
-    <ul class="list-group">
-        {% for f in files %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <a href="{% url 'research:file_detail' f.name %}">{{ f.name }}</a>
-                <span class="text-muted">{{ f.size }} байт — {{ f.modified }}</span>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <div class="alert alert-warning">Файлов на сервере нет.</div>
-{% endif %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-input');
+    if (!searchInput) return;
+    searchInput.addEventListener('input', function () {
+        const q = this.value.trim();
+        fetch(`/search/?q=${encodeURIComponent(q)}`)
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('records-body');
+                tbody.innerHTML = '';
+                if (data.results.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Ничего не найдено</td></tr>';
+                    return;
+                }
+                data.results.forEach(r => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${r.id}</td>
+                            <td>${r.title}</td>
+                            <td>${r.author}</td>
+                            <td>${r.field}</td>
+                            <td>${r.start_date}</td>
+                            <td>${r.status}</td>
+                            <td>${r.budget}</td>
+                            <td><a href="/edit/${r.id}/" class="btn btn-sm btn-outline-primary">✏</a></td>
+                        </tr>`;
+                });
+            });
+    });
+});
+</script>
 {% endblock %}

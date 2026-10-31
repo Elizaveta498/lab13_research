@@ -1,13 +1,20 @@
 from datetime import date
-
 from django import forms
 from django.core.exceptions import ValidationError
-
 from .models import Research
 
-
 class ResearchForm(forms.ModelForm):
-    
+    SAVE_TO_CHOICES = [
+        ('db', 'В базу данных (SQLite)'),
+        ('file', 'В JSON-файл'),
+    ]
+
+    save_to = forms.ChoiceField(
+        choices=SAVE_TO_CHOICES,
+        initial='db',
+        label='Куда сохранить',
+        widget=forms.RadioSelect(),
+    )
 
     class Meta:
         model = Research
@@ -16,9 +23,9 @@ class ResearchForm(forms.ModelForm):
             'start_date', 'end_date', 'status', 'budget',
         ]
         widgets = {
-            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Название'}),
-            'author': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ФИО'}),
-            'field': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Например, физика'}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'author': forms.TextInput(attrs={'class': 'form-control'}),
+            'field': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
@@ -46,15 +53,10 @@ class ResearchForm(forms.ModelForm):
             raise ValidationError('Дата окончания не может быть раньше даты начала.')
         return cleaned
 
-
 class UploadFileForm(forms.Form):
-    
-
     file = forms.FileField(
         label='Выберите JSON-файл',
-        widget=forms.ClearableFileInput(
-            attrs={'class': 'form-control', 'accept': '.json'}
-        ),
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.json'}),
     )
 
     def clean_file(self):

@@ -6,8 +6,21 @@
     {% csrf_token %}
     {% for field in form %}
         <div class="mb-3">
-            <label class="form-label">{{ field.label }}</label>
-            {{ field }}
+            <label class="form-label font-weight-bold">{{ field.label }}</label>
+            {% if field.name == 'save_to' %}
+                <div class="d-flex flex-column gap-2">
+                    {% for radio in field %}
+                        <div class="form-check">
+                            {{ radio.tag }}
+                            <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                {{ radio.choice_label }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                {{ field }}
+            {% endif %}
             {% if field.errors %}
                 <div class="text-danger small">{{ field.errors }}</div>
             {% endif %}
@@ -16,7 +29,7 @@
     {% if form.non_field_errors %}
         <div class="alert alert-danger">{{ form.non_field_errors }}</div>
     {% endif %}
-    <button type="submit" class="btn btn-primary">Сохранить</button>
-    <a href="{% url 'research:index' %}" class="btn btn-link">Отмена</a>
+    <button type="submit" class="btn btn-primary mt-3">Сохранить</button>
+    <a href="{% url 'research:index' %}" class="btn btn-link mt-3">Отмена</a>
 </form>
 {% endblock %}
